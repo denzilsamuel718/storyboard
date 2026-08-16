@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: storyboard-api
+    runtime: node
+    plan: starter
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @storyboard/api prisma:generate && pnpm --filter @storyboard/api build
+    startCommand: pnpm --filter @storyboard/api prisma:migrate && pnpm --filter @storyboard/api prisma:seed && pnpm --filter @storyboard/api start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: storyboard-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+databases:
+  - name: storyboard-db
+    plan: basic-256mb
+    databaseName: storyboard
+    user: storyboard

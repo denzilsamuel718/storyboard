@@ -1,0 +1,17 @@
+{
+  "name": "storyboard-creator-platform",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "pnpm setup:local && pnpm --parallel --filter @storyboard/web --filter @storyboard/api dev",
+    "dev:apps": "pnpm --parallel --filter @storyboard/web --filter @storyboard/api dev",
+    "setup:local": "pnpm --filter @storyboard/api prisma:local:push && pnpm --filter @storyboard/api prisma:local:seed",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @storyboard/api prisma:generate",
+    "db:migrate": "pnpm --filter @storyboard/api prisma:migrate",
+    "db:seed": "pnpm --filter @storyboard/api prisma:seed"
+  }
+}

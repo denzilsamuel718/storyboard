@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CREATOR
+  ADMIN
+}
+
+enum SubmissionType {
+  STORY
+  SCRIPT
+  SCREENPLAY
+  SHORT_FILM
+  FILM_IDEA
+  PITCH
+  OTHER
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  CONTACTED
+  ACCEPTED
+  NOT_SELECTED
+  WITHDRAWN
+  ARCHIVED
+}
+
+enum FileCategory {
+  DOCUMENT
+  IMAGE
+  VIDEO
+}
+
+enum UploadStatus {
+  PENDING
+  UPLOADING
+  COMPLETE
+  FAILED
+  CANCELLED
+  QUARANTINED
+}
+
+model User {
+  id               String   @id @default(uuid()) @db.Uuid
+  role             Role     @default(CREATOR)
+  name             String
+  email            String   @unique
+  phone            String?
+  passwordHash     String
+  emailVerified    Boolean  @default(false)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  profile          CreatorProfile?
+  submissions      Submission[]
+  adminNotes       AdminNote[]
+  auditLogs        AuditLog[]
+  verificationTokens EmailVerification[]
+  resetTokens      PasswordReset[]
+}
+
+model CreatorProfile {
+  id             String @id @default(uuid()) @db.Uuid
+  userId         String @unique @db.Uuid
+  bio            String?
+  avatarUrl      String?
+  portfolioUrl   String?
+  socialLinks    Json?
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SubmissionCounter {
+  year  Int @id
+  value Int @default(0)
+}
+
+model Submission {
+  id                 String           @id @default(uuid()) @db.Uuid
+  publicSubmissionId String?          @unique
+  creatorId          String           @db.Uuid
+  title              String
+  submissionType     SubmissionType
+  logline             String
+  synopsis            String
+  genre               String
+  language            String
+  castCrew            String?
+  estimatedDuration   Int?
+  additionalNotes     String?
+  rightsConfirmed     Boolean          @default(false)
+  status              SubmissionStatus @default(DRAFT)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  submittedAt         DateTime?
+  reviewedAt          DateTime?
+  archivedAt          DateTime?
+  creator             User              @relation(fields: [creatorId], references: [id])
+  files               SubmissionFile[]
+  statusHistory       SubmissionStatusHistory[]
+  adminNotes          AdminNote[]
+  messages            CreatorMessage[]
+  @@index([creatorId, status])
+  @@index([createdAt])
+}
+
+model SubmissionFile {
+  id            String         @id @default(uuid()) @db.Uuid
+  submissionId  String         @db.Uuid
+  originalName  String
+  storageKey    String         @unique
+  mimeType      String
+  sizeBytes     BigInt
+  fileCategory  FileCategory
+  uploadStatus  UploadStatus   @default(PENDING)
+  uploadId      String?
+  checksum      String?
+  createdAt     DateTime       @default(now())
+  submission    Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  @@index([submissionId])
+}
+
+model SubmissionStatusHistory {
+  id           String           @id @default(uuid()) @db.Uuid
+  submissionId String           @db.Uuid
+  fromStatus   SubmissionStatus?
+  toStatus     SubmissionStatus
+  note         String?
+  visible      Boolean          @default(true)
+  changedById  String           @db.Uuid
+  createdAt    DateTime         @default(now())
+  submission   Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  @@index([submissionId, createdAt])
+}
+
+model AdminNote {
+  id           String     @id @default(uuid()) @db.Uuid
+  submissionId String     @db.Uuid
+  adminId      String     @db.Uuid
+  body         String
+  createdAt    DateTime   @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  admin        User       @relation(fields: [adminId], references: [id])
+}
+
+model CreatorMessage {
+  id           String     @id @default(uuid()) @db.Uuid
+  submissionId String     @db.Uuid
+  senderId     String     @db.Uuid
+  body         String
+  createdAt    DateTime   @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String
+  entity     String
+  entityId   String
+  before     Json?
+  after      Json?
+  requestId  String?
+  ip         String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id])
+  @@index([createdAt])
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+coverage
+.env
+.env.local
+*.log
+*.tsbuildinfo
+.docx-render
+apps/api/uploads
+apps/api/.data
+apps/api/prisma/dev.db*
+apps/api/generated
+.pnpm-store
