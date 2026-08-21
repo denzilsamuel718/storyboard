@@ -10,6 +10,16 @@ const config: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   compress: true,
-  async headers(){return[{source:"/:path*",headers:securityHeaders}]}
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "https://storyboard-jowv.onrender.com/api/:path*"
+      }
+    ];
+  }
 };
 export default config;
