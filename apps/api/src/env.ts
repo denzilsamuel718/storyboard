@@ -3,6 +3,10 @@ import { z } from "zod";
 
 const nodeEnvironment = process.env.NODE_ENV || "development";
 const localJwtSecret = "storyboard-local-development-secret-2026";
+const productionFrontendOrigin = "https://storyboard-web-seven.vercel.app";
+const frontendUrl = nodeEnvironment === "production"
+  ? productionFrontendOrigin
+  : process.env.FRONTEND_URL;
 
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -28,6 +32,7 @@ const schema = z.object({
 export const env = schema.parse({
   ...process.env,
   NODE_ENV: nodeEnvironment,
+  FRONTEND_URL: frontendUrl,
   JWT_SECRET: process.env.JWT_SECRET || (nodeEnvironment === "production" ? undefined : localJwtSecret)
 });
 
