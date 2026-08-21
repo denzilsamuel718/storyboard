@@ -16,7 +16,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        sync: false
+        value: https://web-seven.vercel.app
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD

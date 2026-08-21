@@ -18,13 +18,13 @@ Use `render.yaml`, or create a Node service:
 - Start: `pnpm --filter @storyboard/api prisma:migrate && pnpm --filter @storyboard/api prisma:seed && pnpm --filter @storyboard/api start`
 - Health: `/health`
 
-Set `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`, the storage variables, and unique `ADMIN_EMAIL` and `ADMIN_PASSWORD` values. Production startup intentionally fails when the administrator credentials are missing or still use the local default. For transactional email, also set `RESEND_API_KEY` and `EMAIL_FROM`.
+The Blueprint sets `NODE_ENV`, `DATABASE_URL`, `JWT_SECRET`, and the production `FRONTEND_URL`. Set the storage variables before enabling uploads. `ADMIN_EMAIL` and `ADMIN_PASSWORD` are optional as a pair; when both are set, startup creates or updates the administrator. Production rejects partial credentials and the local default password. For transactional email, also set `RESEND_API_KEY` and `EMAIL_FROM`.
 
 If more than one frontend origin is needed, provide a comma-separated `FRONTEND_URL` list. The first origin is used for links in transactional email.
 
 ## Vercel frontend
 
-Import the repository with repository root as the Vercel root and use `vercel.json`. Set `NEXT_PUBLIC_API_URL=https://YOUR-RENDER-SERVICE.onrender.com/api`. Deploy. Add custom domains, update `FRONTEND_URL`, and redeploy the API. A shared parent domain (`app.example.com` and `api.example.com`) is recommended.
+Import the repository with repository root as the Vercel root and use `vercel.json`. The production frontend calls same-origin `/api`, which Vercel rewrites to the Render API. No `NEXT_PUBLIC_API_URL` is needed for the included deployment. If either deployment domain changes, update the rewrite in `vercel.json` and `FRONTEND_URL` in `render.yaml`, then redeploy both services.
 
 ## Release check
 

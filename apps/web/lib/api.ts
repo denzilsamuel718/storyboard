@@ -1,4 +1,8 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/$/, "");
+
+// Production uses Vercel's same-origin /api rewrite. Keeping the API on the
+// same browser origin also makes secure session cookies reliable on mobile.
+export const API_URL = configuredApiUrl || (process.env.NODE_ENV === "production" ? "/api" : "http://localhost:4000/api");
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");

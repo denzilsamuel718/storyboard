@@ -6,8 +6,18 @@ const production = process.env.NODE_ENV === "production";
 const email = process.env.ADMIN_EMAIL || (production ? "" : "admin@sb.com");
 const password = process.env.ADMIN_PASSWORD || (production ? "" : "ChangeMe123!");
 
-if (!email || !password || (production && password === "ChangeMe123!")) {
-  throw new Error("ADMIN_EMAIL and a secure ADMIN_PASSWORD are required in production");
+if (production && !email && !password) {
+  console.log("Admin seed skipped: set ADMIN_EMAIL and ADMIN_PASSWORD to create an administrator");
+  await prisma.$disconnect();
+  process.exit(0);
+}
+
+if (!email || !password) {
+  throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set together");
+}
+
+if (production && password === "ChangeMe123!") {
+  throw new Error("ADMIN_PASSWORD must not use the local default in production");
 }
 
 await prisma.user.upsert({
