@@ -64,7 +64,7 @@ async function audit(req: Request, action: string, entity: string, entityId: str
 }
 
 app.get("/", (_req, res) => res.json({ status: "ok", service: "storyboard-api", frontend: allowedOrigins[0], health: "/health" }));
-app.get("/health", (_req, res) => res.json({ status: "ok", service: "storyboard-api", timestamp: new Date().toISOString() }));
+app.get(["/health", "/api/health"], (_req, res) => res.json({ status: "ok", service: "storyboard-api", timestamp: new Date().toISOString() }));
 app.get("/ready", async (_req, res) => { try { await db.$queryRaw`SELECT 1`; res.json({ status: "ready", database: true, storage: storageConfigured }); } catch { res.status(503).json({ status: "not_ready" }); } });
 
 const credentialsSchema = z.object({ email: z.string().email().transform(v => v.toLowerCase()), password: z.string().min(8).max(128) });
