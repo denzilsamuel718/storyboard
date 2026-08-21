@@ -63,6 +63,7 @@ async function audit(req: Request, action: string, entity: string, entityId: str
   await db.auditLog.create({ data: { actorId: req.user?.id, action, entity, entityId, requestId: req.requestId, ip: req.ip, before: before as Prisma.InputJsonValue | undefined, after: after as Prisma.InputJsonValue | undefined } });
 }
 
+app.get("/", (_req, res) => res.json({ status: "ok", service: "storyboard-api", frontend: allowedOrigins[0], health: "/health" }));
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "storyboard-api", timestamp: new Date().toISOString() }));
 app.get("/ready", async (_req, res) => { try { await db.$queryRaw`SELECT 1`; res.json({ status: "ready", database: true, storage: storageConfigured }); } catch { res.status(503).json({ status: "not_ready" }); } });
 
